@@ -39,9 +39,16 @@ function sp(){
         self.data = data;
         
         //define the domain of the scatter plot axes
-        //...
-        
-        
+        //Task1
+        //Choose the data attributes to visualize and define the scale of the scatter plot axes in the parser
+        // d3.csv() using the operator domain().   
+
+    
+        x.domain([0, d3.max(data, function(d){
+            //console.log("ERATE", d["Employment rate"]);  
+            return d["Employment rate"]; }) ]);
+        y.domain([0, d3.max(data, function(d){return d["Unemployment rate"]; }) ]);
+
         draw();
 
     });
@@ -57,7 +64,8 @@ function sp(){
             .append("text")
             .attr("class", "label")
             .attr("x", width)
-            .attr("y", -6);
+            .attr("y", -6)
+            //.text("Employment rate");
             
         // Add y axis and title.
         svg.append("g")
@@ -67,16 +75,56 @@ function sp(){
             .attr("class", "label")
             .attr("transform", "rotate(-90)")
             .attr("y", 6)
-            .attr("dy", ".71em");
+            .attr("dy", ".71em")
+            //.text("Unemployment rate");
             
         // Add the scatter dots.
         svg.selectAll(".dot")
             .data(self.data)
             .enter().append("circle")
             .attr("class", "dot")
+            .attr("r", 2)
+            .attr("cx", function(d){
+                return d["Employment rate"];
+            })
+            .attr("cy", function(d){
+                return d["Unemployment rate"];
+            });
             //Define the x and y coordinate data values for the dots
             //...
+        svg.selectAll("text")
+            .data(self.data)
+            .enter()
+            .append("text")
+            .text(function(d){
+                return d["Employment rate"] + ", " + d["Unemployment rate"] + ", " + d["Country"];
+            })
+            .attr("x", function(d){
+                return d["Employment rate"];
+            })
+            .attr("y", function(d){
+                return d["Unemployment rate"];
+            })
+            .attr("font-family", "sans-serif")
+            .attr("font-size", "8px")
+            .attr("fill", "red");
+
+        svg.append("text")
+            .attr("class", "x label")
+            .attr("text-anchor", "end")
+            .attr("x", width)
+            .attr("y", height - 6)
+            .text("Employment rate");
             //tooltip
+
+        svg.append("text")
+            .attr("class", "y label")
+            .attr("text-anchor", "end")
+            .attr("y", 6)
+            .attr("dy", ".75em")
+            .attr("transform", "rotate(-90)")
+            .text("Unemployment rate")
+
             .on("mousemove", function(d) {
                 //...    
             })
