@@ -4,15 +4,19 @@ function sp(){
 
     var spDiv = $("#sp");
 
-    var margin = {top: 20, right: 20, bottom: 30, left: 40},
+    var margin = {top: 20, right: 20, bottom: 20, left: 40},
         width = spDiv.width() - margin.right - margin.left,
         height = spDiv.height() - margin.top - margin.bottom;
 
     //initialize color scale
-    //...
-    
+    var color = d3.scale.category20();
+
     //initialize tooltip
-    //...
+    var tooltip = d3.select("body")
+        .append("div")
+        .style("position", "absolute")
+        .style("z-index", "10")
+        .style("visibility", "hidden");
 
     var x = d3.scale.linear()
         .range([0, width]);
@@ -22,11 +26,13 @@ function sp(){
 
     var xAxis = d3.svg.axis()
         .scale(x)
-        .orient("bottom");
+        .orient("bottom")
+
 
     var yAxis = d3.svg.axis()
         .scale(y)
-        .orient("left");
+        .orient("left")
+
 
     var svg = d3.select("#sp").append("svg")
         .attr("width", width + margin.left + margin.right)
@@ -34,20 +40,18 @@ function sp(){
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+
+
+
     //Load data
     d3.csv("data/OECD-better-life-index-hi.csv", function(error, data) {
         self.data = data;
-        
-        //define the domain of the scatter plot axes
-        //Task1
-        //Choose the data attributes to visualize and define the scale of the scatter plot axes in the parser
-        // d3.csv() using the operator domain().   
 
-    
-        x.domain([0, d3.max(data, function(d){
-            //console.log("ERATE", d["Employment rate"]);  
-            return d["Employment rate"]; }) ]);
-        y.domain([0, d3.max(data, function(d){return d["Unemployment rate"]; }) ]);
+        //define the domain of the scatter plot axes
+		x.domain([0, d3.max(data, function(d) { return d["Employment rate"]; })]);
+		y.domain([0, d3.max(data, function(d) { return d["Household income"]; })]);
+
+        console.log( d3.keys(data[0])[2]);
 
         draw();
 
@@ -55,7 +59,9 @@ function sp(){
 
     function draw()
     {
-        
+
+
+
         // Add x axis and title.
         svg.append("g")
             .attr("class", "x axis")
@@ -63,10 +69,13 @@ function sp(){
             .call(xAxis)
             .append("text")
             .attr("class", "label")
-            .attr("x", width)
+            .attr("x", width-50)
             .attr("y", -6)
-            //.text("Employment rate");
-            
+			.data(self.data)
+            .text( function(d) {
+                return d3.keys(d)[2];
+            })
+
         // Add y axis and title.
         svg.append("g")
             .attr("class", "y axis")
@@ -74,80 +83,77 @@ function sp(){
             .append("text")
             .attr("class", "label")
             .attr("transform", "rotate(-90)")
-            .attr("y", 6)
+            .attr("y", 8)
+            .attr("x", -100)
             .attr("dy", ".71em")
-            //.text("Unemployment rate");
-            
+            .data(self.data)
+			.text( function(d) {
+                return d3.keys(d)[1];
+            })
+
+
+
         // Add the scatter dots.
         svg.selectAll(".dot")
             .data(self.data)
             .enter().append("circle")
             .attr("class", "dot")
-            .attr("r", 2)
-            .attr("cx", function(d){
-                return d["Employment rate"];
+			.attr("cx", function(d) {
+                return x(d["Employment rate"]); //Load data
             })
-            .attr("cy", function(d){
-                return d["Unemployment rate"];
-            });
+			.attr("cy", function(d) {
+                return y(d["Household income"]); //Load data
+            })
+			.attr("r", 6)
+            .style("fill", function(d) { return color(d["Country"]);})
+
             //Define the x and y coordinate data values for the dots
             //...
-        svg.selectAll("text")
-            .data(self.data)
-            .enter()
-            .append("text")
-            .text(function(d){
-                return d["Employment rate"] + ", " + d["Unemployment rate"] + ", " + d["Country"];
-            })
-            .attr("x", function(d){
-                return d["Employment rate"];
-            })
-            .attr("y", function(d){
-                return d["Unemployment rate"];
-            })
-            .attr("font-family", "sans-serif")
-            .attr("font-size", "8px")
-            .attr("fill", "red");
-
-        svg.append("text")
-            .attr("class", "x label")
-            .attr("text-anchor", "end")
-            .attr("x", width)
-            .attr("y", height - 6)
-            .text("Employment rate");
             //tooltip
-
-        svg.append("text")
-            .attr("class", "y label")
-            .attr("text-anchor", "end")
-            .attr("y", 6)
-            .attr("dy", ".75em")
-            .attr("transform", "rotate(-90)")
-            .text("Unemployment rate")
+            .on("mouseover", function(d){
+                tooltip.style("visibility", "visible");
+                return tooltip.text(d["Country"]);
+            })
 
             .on("mousemove", function(d) {
-                //...    
+              tooltip.transition()
+              .duration(200)
+              .style("opacity", .9);
+              tooltip.html(d["Country"] + "<br>" + d["Employment rate"])
+              .style("left", (d3.event.pageX) + "px")
+              .style("top", (d3.event.pageY - 28) + "px");
+                //return tooltip.style("top", (event.pageY-10)+"px").style("left",(event.pageX+10)+"px");
             })
+
             .on("mouseout", function(d) {
-                //...   
+              return tooltip.style("visibility", "hidden");
             })
+
             .on("click",  function(d) {
-                //...    
+                sp1.selectDot(d["Country"]);
+                selFeature(d["Country"]);
             });
     }
 
     //method for selecting the dot from other components
     this.selectDot = function(value){
         //...
+         //...
+        d3.selectAll(".dot")
+        .style("opacity", function(d) {
+            if(value.indexOf(d["Country"]) != -1)
+                return 1.0;
+            else
+                return 0.15;
+        });
+        console.log("Scatter Plot: ",value);
+        return value;
     };
-    
+
     //method for selecting features of other components
     function selFeature(value){
         //...
+        pc1.selectLine(value);
     }
 
 }
-
-
-
-
