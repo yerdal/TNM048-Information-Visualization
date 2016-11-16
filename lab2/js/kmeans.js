@@ -4,13 +4,6 @@
     * @param k
     * @return {Object}
     */
-   
-       /**
-    * k means algorithm
-    * @param data
-    * @param k
-    * @return {Object}
-    */
 
     var cluster_array = [];
     var centroids = [];
@@ -26,7 +19,6 @@
       for(var i = 0; i < k; i++){
         item[i] = data[Math.floor(Math.random()*data.length)];
       }
-
       return item;
     }
 
@@ -40,13 +32,10 @@
         for (var j = 0; j < centroids.length; j++) {
             var sum = 0;
             keys.forEach(function(dimension){
-            	if(dimension != "id" && dimension != "time" && dimension != "place" && dimension != "lat" && dimension != "lon" ){
-            		var p = Number(point[dimension]);
-              		var q = Number(centroids[j][dimension]);
+              var p = Number(point[dimension]);
+              var q = Number(centroids[j][dimension]);
 
-              		sum += Math.pow(q-p, 2);
-            	}
-              
+              sum += Math.pow(q-p, 2);
             });
 
             sum = Math.sqrt(sum);
@@ -83,9 +72,7 @@
           point[dimension] = avg/count;
 
         });
-
         temp.push(point);
-
       }
       return temp;
     }
@@ -123,7 +110,6 @@
       var oldQuality = 0;
       var qualityDiff = 0;
       var n = 1;
-
 
         do {
           //STEP 1 Take out k random 2objects, centroids.

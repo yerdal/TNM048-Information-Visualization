@@ -2,6 +2,7 @@
 
 .point {
     fill: orange;
+    stroke-opacity: .1;
     /*stroke: #FFF;*/
 }
 
